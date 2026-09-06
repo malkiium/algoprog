@@ -18,11 +18,8 @@ final int GENERATION_DURATION_MS = 1000;
 // DATA
 // ===========================
 
-float[][] values =
-  new float[GRID_W][GRID_H];
-
-boolean[][] generated =
-  new boolean[GRID_W][GRID_H];
+float[][] values = new float[GRID_W][GRID_H];
+boolean[][] generated = new boolean[GRID_W][GRID_H];
 
 int centerX;
 int centerY;
@@ -35,7 +32,6 @@ float msPerRadius;
 
 boolean finished;
 
-
 // ===========================
 // SETUP
 // ===========================
@@ -43,10 +39,8 @@ boolean finished;
 void setup() {
   size(800, 800);
   noStroke();
-
   resetGeneration();
 }
-
 
 // ===========================
 // DRAW
@@ -54,11 +48,9 @@ void setup() {
 
 void draw() {
   background(0);
-
   animateGeneration();
   drawGrid();
 }
-
 
 // ===========================
 // KEYBOARD
@@ -70,16 +62,13 @@ void keyPressed() {
   }
 }
 
-
 // ===========================
 // RESET
 // ===========================
 
 void resetGeneration() {
-
   for (int x = 0; x < GRID_W; x++) {
     for (int y = 0; y < GRID_H; y++) {
-
       values[x][y] = 0;
       generated[x][y] = false;
     }
@@ -88,11 +77,8 @@ void resetGeneration() {
   centerX = GRID_W / 2;
   centerY = GRID_H / 2;
 
-  values[centerX][centerY] =
-    START_VALUE;
-
-  generated[centerX][centerY] =
-    true;
+  values[centerX][centerY] = START_VALUE;
+  generated[centerX][centerY] = true;
 
   maxRadius = ceil(
     sqrt(
@@ -102,36 +88,23 @@ void resetGeneration() {
   );
 
   currentRadius = 1;
-
-  msPerRadius =
-    GENERATION_DURATION_MS
-    / (float) maxRadius;
-
+  msPerRadius = GENERATION_DURATION_MS / (float) maxRadius;
   nextRadiusTime = millis();
-
   finished = false;
 }
-
 
 // ===========================
 // ANIMATION
 // ===========================
 
 void animateGeneration() {
-
   if (finished) {
     return;
   }
 
-  while (
-    !finished &&
-    millis() >= nextRadiusTime
-  ) {
-
+  while (!finished && millis() >= nextRadiusTime) {
     processRadius(currentRadius);
-
     currentRadius++;
-
     nextRadiusTime += msPerRadius;
 
     if (currentRadius > maxRadius) {
@@ -140,46 +113,20 @@ void animateGeneration() {
   }
 }
 
-
 // ===========================
 // PROCESS ONE RADIUS
 // ===========================
 
 void processRadius(int radius) {
-
-  /*
-   * Slight angular offset between rings
-   * avoids repeatedly hitting the exact same
-   * grid alignments.
-   */
-
-  float angleOffset =
-    (radius % 2 == 0)
-    ? 0.5
-    : 0.0;
-
+  // Slight angular offset between rings avoids repeating the same grid alignments.
+  float angleOffset = (radius % 2 == 0) ? 0.5 : 0.0;
 
   for (int ray = 0; ray < RAY_COUNT; ray++) {
+    float angleDegrees = (ray + angleOffset) * 360.0 / RAY_COUNT;
+    float angle = radians(angleDegrees);
 
-    float angleDegrees =
-      (ray + angleOffset)
-      * 360.0
-      / RAY_COUNT;
-
-    float angle =
-      radians(angleDegrees);
-
-
-    int x = round(
-      centerX +
-      cos(angle) * radius
-    );
-
-    int y = round(
-      centerY +
-      sin(angle) * radius
-    );
-
+    int x = round(centerX + cos(angle) * radius);
+    int y = round(centerY + sin(angle) * radius);
 
     if (!insideGrid(x, y)) {
       continue;
@@ -189,531 +136,250 @@ void processRadius(int radius) {
       continue;
     }
 
-
     generateCell(x, y, angle);
   }
 
-
   fillSmallHoles(radius);
 }
-
 
 // ===========================
 // GENERATE CELL
 // ===========================
 
-void generateCell(
-  int x,
-  int y,
-  float angle
-) {
+void generateCell(int x, int y, float angle) {
+  // Step one cell backward along the ray, toward the center.
+  float inwardX = x - cos(angle);
+  float inwardY = y - sin(angle);
 
-  /*
-   * Step one cell backward along
-   * the ray, toward the center.
-   */
-
-  float inwardX =
-    x - cos(angle);
-
-  float inwardY =
-    y - sin(angle);
-
-
-  int baseX =
-    round(inwardX);
-
-  int baseY =
-    round(inwardY);
-
-
-  // ===========================
-  // FIND POSSIBLE PARENTS
-  // ===========================
+  int baseX = round(inwardX);
+  int baseY = round(inwardY);
 
   int[] parentX = new int[9];
   int[] parentY = new int[9];
-
   int parentCount = 0;
 
-
-  /*
-   * Search the 3x3 area around the
-   * point immediately behind the new cell.
-   */
-
+  // Search the 3x3 area around the spot immediately behind the new cell.
   for (int ox = -1; ox <= 1; ox++) {
     for (int oy = -1; oy <= 1; oy++) {
+      int px = baseX + ox;
+      int py = baseY + oy;
 
-      int px =
-        baseX + ox;
-
-      int py =
-        baseY + oy;
-
-
-      if (!insideGrid(px, py)) {
+      if (!insideGrid(px, py) || !generated[px][py]) {
         continue;
       }
 
-      if (!generated[px][py]) {
-        continue;
-      }
-
-
-      /*
-       * Only allow cells that are actually
-       * closer to the center than the new cell.
-       */
-
-      float parentDist =
-        dist(
-          px,
-          py,
-          centerX,
-          centerY
-        );
-
-      float childDist =
-        dist(
-          x,
-          y,
-          centerX,
-          centerY
-        );
-
+      float parentDist = dist(px, py, centerX, centerY);
+      float childDist = dist(x, y, centerX, centerY);
 
       if (parentDist >= childDist) {
         continue;
       }
 
-
       parentX[parentCount] = px;
       parentY[parentCount] = py;
-
       parentCount++;
     }
   }
 
-
-  // ===========================
-  // FALLBACK
-  // ===========================
-
-  /*
-   * If somehow no inward parent exists,
-   * use any generated neighbor.
-   */
-
+  // Fallback: if no inward parent exists, use any generated neighbor.
   if (parentCount == 0) {
-
     for (int ox = -1; ox <= 1; ox++) {
       for (int oy = -1; oy <= 1; oy++) {
-
         if (ox == 0 && oy == 0) {
           continue;
         }
 
-        int px =
-          x + ox;
+        int px = x + ox;
+        int py = y + oy;
 
-        int py =
-          y + oy;
-
-
-        if (!insideGrid(px, py)) {
+        if (!insideGrid(px, py) || !generated[px][py]) {
           continue;
         }
-
-        if (!generated[px][py]) {
-          continue;
-        }
-
 
         parentX[parentCount] = px;
         parentY[parentCount] = py;
-
         parentCount++;
       }
     }
   }
 
-
-  /*
-   * Still nothing?
-   * Extremely unlikely, but just skip.
-   */
-
   if (parentCount == 0) {
     return;
   }
 
+  int selected = constrain(int(random(parentCount)), 0, parentCount - 1);
+  int px = parentX[selected];
+  int py = parentY[selected];
 
-  // ===========================
-  // RANDOM PARENT
-  // ===========================
-
-  int selected =
-    int(random(parentCount));
-
-  int px =
-    parentX[selected];
-
-  int py =
-    parentY[selected];
-
-
-  float parentValue =
-    values[px][py];
-
-
-  // ===========================
-  // EVOLUTION
-  // ===========================
-
-  float evolved =
-    parentValue *
-    random(
-      1.0 - VARIATION,
-      1.0 + VARIATION
-    );
-
-
-  // ===========================
-  // COHERENCE
-  // ===========================
-
-  float result =
-    evolved;
-
-  int neighborCount =
-    getGeneratedNeighborCount(
-      x,
-      y
-    );
-
-
-  if (neighborCount > 0) {
-
-    float neighborAverage =
-      getNeighborAverage(
-        x,
-        y
-      );
-
-
-    result =
-      lerp(
-        evolved,
-        neighborAverage,
-        NEIGHBOR_BLEND
-      );
+  if (!insideGrid(px, py)) {
+    return;
   }
 
+  float parentValue = values[px][py];
 
-  values[x][y] =
-    result;
+  float evolved = parentValue * random(1.0 - VARIATION, 1.0 + VARIATION);
 
-  generated[x][y] =
-    true;
+  float result = evolved;
+  int neighborCount = getGeneratedNeighborCount(x, y);
+
+  if (neighborCount > 0) {
+    float neighborAverage = getNeighborAverage(x, y);
+    result = lerp(evolved, neighborAverage, NEIGHBOR_BLEND);
+  }
+
+  values[x][y] = result;
+  generated[x][y] = true;
 }
-
 
 // ===========================
 // FILL SMALL GAPS
 // ===========================
 
 void fillSmallHoles(int radius) {
-
-  boolean[][] shouldFill =
-    new boolean[GRID_W][GRID_H];
-
-  float[][] fillValue =
-    new float[GRID_W][GRID_H];
-
+  boolean[][] shouldFill = new boolean[GRID_W][GRID_H];
+  float[][] fillValue = new float[GRID_W][GRID_H];
 
   for (int x = 0; x < GRID_W; x++) {
     for (int y = 0; y < GRID_H; y++) {
-
       if (generated[x][y]) {
         continue;
       }
 
+      float dx = x - centerX;
+      float dy = y - centerY;
+      float distance = sqrt(dx * dx + dy * dy);
 
-      float dx =
-        x - centerX;
-
-      float dy =
-        y - centerY;
-
-      float distance =
-        sqrt(
-          dx * dx +
-          dy * dy
-        );
-
-
-      if (
-        abs(distance - radius)
-        > 1.25
-      ) {
+      if (abs(distance - radius) > 1.25) {
         continue;
       }
 
-
-      int count =
-        getGeneratedNeighborCount(
-          x,
-          y
-        );
-
+      int count = getGeneratedNeighborCount(x, y);
 
       if (count >= 3) {
+        float avg = getNeighborAverage(x, y);
+        avg *= random(0.97, 1.03);
 
-        float avg =
-          getNeighborAverage(
-            x,
-            y
-          );
-
-
-        /*
-         * Add a tiny amount of noise,
-         * otherwise filled cells become
-         * suspiciously smooth.
-         */
-
-        avg *= random(
-          0.97,
-          1.03
-        );
-
-
-        shouldFill[x][y] =
-          true;
-
-        fillValue[x][y] =
-          avg;
+        shouldFill[x][y] = true;
+        fillValue[x][y] = avg;
       }
     }
   }
 
-
-  // Apply afterward.
-
   for (int x = 0; x < GRID_W; x++) {
     for (int y = 0; y < GRID_H; y++) {
-
       if (!shouldFill[x][y]) {
         continue;
       }
 
-
-      values[x][y] =
-        fillValue[x][y];
-
-      generated[x][y] =
-        true;
+      values[x][y] = fillValue[x][y];
+      generated[x][y] = true;
     }
   }
 }
-
 
 // ===========================
 // NEIGHBOR AVERAGE
 // ===========================
 
-float getNeighborAverage(
-  int x,
-  int y
-) {
-
+float getNeighborAverage(int x, int y) {
   float total = 0;
   int count = 0;
 
-
   for (int ox = -1; ox <= 1; ox++) {
     for (int oy = -1; oy <= 1; oy++) {
-
       if (ox == 0 && oy == 0) {
         continue;
       }
 
+      int nx = x + ox;
+      int ny = y + oy;
 
-      int nx =
-        x + ox;
-
-      int ny =
-        y + oy;
-
-
-      if (!insideGrid(nx, ny)) {
+      if (!insideGrid(nx, ny) || !generated[nx][ny]) {
         continue;
       }
 
-      if (!generated[nx][ny]) {
-        continue;
-      }
-
-
-      total +=
-        values[nx][ny];
-
+      total += values[nx][ny];
       count++;
     }
   }
-
 
   if (count == 0) {
     return 0;
   }
 
-
-  return
-    total / count;
+  return total / count;
 }
-
 
 // ===========================
 // NEIGHBOR COUNT
 // ===========================
 
-int getGeneratedNeighborCount(
-  int x,
-  int y
-) {
-
+int getGeneratedNeighborCount(int x, int y) {
   int count = 0;
-
 
   for (int ox = -1; ox <= 1; ox++) {
     for (int oy = -1; oy <= 1; oy++) {
-
       if (ox == 0 && oy == 0) {
         continue;
       }
 
+      int nx = x + ox;
+      int ny = y + oy;
 
-      int nx =
-        x + ox;
-
-      int ny =
-        y + oy;
-
-
-      if (!insideGrid(nx, ny)) {
-        continue;
-      }
-
-
-      if (generated[nx][ny]) {
+      if (!insideGrid(nx, ny) || generated[nx][ny]) {
         count++;
       }
     }
   }
 
-
   return count;
 }
-
 
 // ===========================
 // DRAW GRID
 // ===========================
 
 void drawGrid() {
+  float cellW = width / (float) GRID_W;
+  float cellH = height / (float) GRID_H;
 
-  float cellW =
-    width / (float) GRID_W;
-
-  float cellH =
-    height / (float) GRID_H;
-
-
-  float minValue =
-    Float.MAX_VALUE;
-
-  float maxValue =
-    -Float.MAX_VALUE;
-
+  float minValue = Float.MAX_VALUE;
+  float maxValue = -Float.MAX_VALUE;
 
   for (int x = 0; x < GRID_W; x++) {
     for (int y = 0; y < GRID_H; y++) {
-
       if (!generated[x][y]) {
         continue;
       }
 
-
-      minValue =
-        min(
-          minValue,
-          values[x][y]
-        );
-
-      maxValue =
-        max(
-          maxValue,
-          values[x][y]
-        );
+      minValue = min(minValue, values[x][y]);
+      maxValue = max(maxValue, values[x][y]);
     }
   }
 
-
   for (int x = 0; x < GRID_W; x++) {
     for (int y = 0; y < GRID_H; y++) {
-
       if (!generated[x][y]) {
         continue;
       }
 
-
       float brightness;
-
-
       if (maxValue == minValue) {
-
         brightness = 128;
-
       } else {
-
-        brightness =
-          map(
-            values[x][y],
-            minValue,
-            maxValue,
-            0,
-            255
-          );
+        brightness = map(values[x][y], minValue, maxValue, 0, 255);
       }
 
-
       fill(brightness);
-
-
-      rect(
-        x * cellW,
-        y * cellH,
-        cellW + 1,
-        cellH + 1
-      );
+      rect(x * cellW, y * cellH, cellW + 1, cellH + 1);
     }
   }
 }
-
 
 // ===========================
 // BOUNDS
 // ===========================
 
-boolean insideGrid(
-  int x,
-  int y
-) {
-
-  return
-    x >= 0 &&
-    x < GRID_W &&
-    y >= 0 &&
-    y < GRID_H;
+boolean insideGrid(int x, int y) {
+  return x >= 0 && x < GRID_W && y >= 0 && y < GRID_H;
 }
