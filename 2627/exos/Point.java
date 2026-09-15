@@ -7,6 +7,7 @@ public class Point {
         this.y = y;
     }
 
+    @SuppressWarnings("unused")
     Point() {
         this.x = 0;
         this.y = 0;
@@ -39,6 +40,7 @@ public class Point {
         );
     }
 
+    @SuppressWarnings("unused")
     void translation(Point p) {
         this.x += p.x;
         this.y += p.y;
