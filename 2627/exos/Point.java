@@ -23,6 +23,11 @@ public class Point {
         this.y = ord;
     }
 
+    @Override
+    public String toString() {
+        return "Point(" + x + ", " + y + ")";
+    }
+
     void xy() {
         System.out.println("Abscisse : " + x + " ; Ordonnée : " + y);
     }
