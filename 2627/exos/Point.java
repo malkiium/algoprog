@@ -7,12 +7,6 @@ public class Point {
         this.y = y;
     }
 
-    @SuppressWarnings("unused")
-    Point() {
-        this.x = 0;
-        this.y = 0;
-    }
-
     public double getX() {
         return this.x;
     }
@@ -38,12 +32,6 @@ public class Point {
             (this.x - p.getX()) * (this.x - p.getX())
             + (this.y - p.getY()) * (this.y - p.getY())
         );
-    }
-
-    @SuppressWarnings("unused")
-    void translation(Point p) {
-        this.x += p.x;
-        this.y += p.y;
     }
 
     void translation(double x1, double y1) {
