@@ -81,6 +81,7 @@ public class Grille {
         }
     }
   }
+
   public int compare(Grille g) {
     int nb = 0;
 
