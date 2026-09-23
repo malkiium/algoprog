@@ -1,6 +1,5 @@
 import java.util.Scanner;
 
-//-//-//-//-//-//-//-//-//
 
 public class Grille {
   public final int TAILLE_GRILLE = 6;
@@ -57,28 +56,56 @@ public class Grille {
   }
 
   public void initInteractif() {
-    Scanner sc = new Scanner(System.in);
+  Scanner sc = new Scanner(System.in);
+
     for (int i = 0; i < taille; i++) {
+      boolean ok = false;
+      while (!ok) {
         System.out.print("Numero " + (i + 1) + " : ");
-        lesNumeros[i] = sc.nextInt();
+        if (!sc.hasNextInt()) {
+          System.out.println("Entre un nombre stp");
+          sc.next();
+          continue;
+        }
+        int nombre = sc.nextInt();
+        if (nombre < 1 || nombre > MAX_GRILLE) {
+          System.out.println("Le nombre doit etre entre 1 et 49");
+          continue;
+        }
+        boolean dejaLa = false;
+        for (int j = 0; j < i; j++) {
+          if (lesNumeros[j] == nombre) {
+            dejaLa = true;
+          }
+        }
+        if (dejaLa) {
+          System.out.println("Ce numero est deja dans la grille");
+          continue;
+        }
+        lesNumeros[i] = nombre;
+        ok = true;
+      }
     }
-  }
+  }  
 
   public void initAleatoire() {
-    int i = 0;
+    int nombre;
+    boolean dejaLa;
+    for (int i = 0; i < taille; i++) {
+      dejaLa = false;
+      nombre = (int)(Math.random() * MAX_GRILLE) + 1;
 
-    while (i < taille) {
-        int nombre = (int)(Math.random() * MAX_GRILLE) + 1;
-        int j = 0;
-
-        while (j < i && lesNumeros[j] != nombre) {
-            j++;
+      for (int j = 0; j < i; j++) {
+        if (lesNumeros[j] == nombre) {
+          dejaLa = true;
         }
+      }
 
-        if (j == i) {
-            lesNumeros[i] = nombre;
-            i++;
-        }
+      if (dejaLa) {
+        i--;
+      } else {
+        lesNumeros[i] = nombre;
+      }
     }
   }
 
@@ -109,5 +136,24 @@ public class Grille {
         lesNumeros[fin] = lesNumeros[posMax];
         lesNumeros[posMax] = temp;
     }
+  }
+
+  public int compareMieux(Grille g) {
+    int i = 0;
+    int j = 0;
+    int nb = 0;
+
+    while (i < this.taille && j < g.taille) {
+        if (this.lesNumeros[i] == g.lesNumeros[j]) {
+            nb++;
+            i++;
+            j++;
+        } else if (this.lesNumeros[i] < g.lesNumeros[j]) {
+            i++;
+        } else {
+            j++;
+        }
+    }
+    return nb;
   }
 }
