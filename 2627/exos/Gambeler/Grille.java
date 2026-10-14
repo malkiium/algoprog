@@ -14,12 +14,12 @@ public class Grille {
 
   public Grille(int taille) {
     this.taille = taille;
-    this.lesNumeros = new int[MAX_GRILLE];
+    this.lesNumeros = new int[taille];
   }
 
   public Grille(Grille g) {
     this.taille = g.taille;
-    this.lesNumeros = new int[MAX_GRILLE];
+    this.lesNumeros = new int[taille];
 
     for (int i = 0; i < taille; i++) {
         this.lesNumeros[i] = g.lesNumeros[i];
@@ -40,11 +40,7 @@ public class Grille {
   public void setLeNumero(int pos, int val) {
     lesNumeros[pos] = val;
   }
-
-  public void setTaille(int taille) {
-    this.taille = taille;
-  }
-
+  
   public String toString() {
     String total = "";
     for (int i=0; i<(taille-1); i++) {
@@ -111,11 +107,13 @@ public class Grille {
 
   public int compare(Grille g) {
     int nb = 0;
-
-    for (int i = 0; i < this.taille; i++) {
+    boolean present = false;
+    while (i<this.taille && present=false;) {
+      present = false;
         for (int j = 0; j < g.taille; j++) {
             if (this.lesNumeros[i] == g.lesNumeros[j]) {
                 nb++;
+                present = true;
             }
         }
     }
