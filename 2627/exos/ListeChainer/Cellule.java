@@ -15,7 +15,7 @@ public class Cellule {
 
 
     /**
-     * constructeur créant une cellule encapsulant l'objet _contenu 
+     * constructeur créant une cellule encapsulant l'objet _contenu
      * @param _contenu l'objet à encapsuler
      */
     public Cellule(Object _contenu) {
@@ -38,7 +38,7 @@ public class Cellule {
     public void setSuivant(Cellule _c) {
         suivant = _c;
     }
-    
+
     /**
      * accesseur du contenu
      * @return contenu
@@ -66,7 +66,5 @@ public class Cellule {
             return contenu.toString();
         }
     }
-    
 
 }
-
