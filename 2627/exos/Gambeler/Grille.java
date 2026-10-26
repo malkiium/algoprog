@@ -2,6 +2,7 @@ import java.util.Scanner;
 
 
 public class Grille {
+  private static final Scanner SCANNER = new Scanner(System.in);
   public final int TAILLE_GRILLE = 6;
   public final int MAX_GRILLE = 49;
   private int[] lesNumeros;
@@ -52,18 +53,16 @@ public class Grille {
   }
 
   public void initInteractif() {
-  Scanner sc = new Scanner(System.in);
-
     for (int i = 0; i < taille; i++) {
       boolean ok = false;
       while (!ok) {
         System.out.print("Numero " + (i + 1) + " : ");
-        if (!sc.hasNextInt()) {
+        if (!SCANNER.hasNextInt()) {
           System.out.println("Entre un nombre stp");
-          sc.next();
+          SCANNER.next();
           continue;
         }
-        int nombre = sc.nextInt();
+        int nombre = SCANNER.nextInt();
         if (nombre < 1 || nombre > MAX_GRILLE) {
           System.out.println("Le nombre doit etre entre 1 et 49");
           continue;
@@ -107,16 +106,18 @@ public class Grille {
 
   public int compare(Grille g) {
     int nb = 0;
-    boolean present = false;
-    while (i<this.taille && present=false;) {
-      present = false;
-        for (int j = 0; j < g.taille; j++) {
-            if (this.lesNumeros[i] == g.lesNumeros[j]) {
-                nb++;
-                present = true;
-            }
+    boolean[] dejaComptes = new boolean[g.taille];
+
+    for (int i = 0; i < this.taille; i++) {
+      for (int j = 0; j < g.taille; j++) {
+        if (!dejaComptes[j] && this.lesNumeros[i] == g.lesNumeros[j]) {
+          nb++;
+          dejaComptes[j] = true;
+          break;
         }
+      }
     }
+
     return nb;
   }
 
