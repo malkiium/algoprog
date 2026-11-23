@@ -108,7 +108,7 @@ public class ListeChainee {
       this.queue = null;
     } 
     else {
-      while (this.courant.getSuivant().getSuivant() != null) {
+      while (this.courant.getSuivant().getSuivant() != null) {
         this.courant = this.courant.getSuivant();
       }
       this.queue = this.courant;
