@@ -72,12 +72,15 @@ public class ListeChainee {
   }
 
   public void retireTete() {
-    if (this.tete.getSuivant() != null) {
-      this.tete = this.tete.getSuivant();
-    } else {
-      this.tete = null;
+    if (this.tete == null) {
+      return;
+    }
+    this.tete = this.tete.getSuivant();
+    
+    if (this.tete == null) {
       this.queue = null;
     }
+    this.razCourant();
   }
 
   public String toString() {
@@ -92,12 +95,14 @@ public class ListeChainee {
   }
   
   public void ajouteQueue(Object o_queue) {
-    if (this.queue != null) {
-      this.queue.setSuivant(new Cellule(o_queue));
-      this.queue = this.queue.getSuivant();
+    Cellule t = new Cellule(o_queue);
+  
+    if (this.queue == null) {
+      this.tete = t;
     } else {
-      this.queue = new Cellule(o_queue);
+      this.queue.setSuivant(t);
     }
+    this.queue = t;
   }
 
   public void retireQueue() {
@@ -106,8 +111,7 @@ public class ListeChainee {
       return;
     } else if (this.courant.getSuivant().getSuivant() == null) {
       this.queue = null;
-    } 
-    else {
+    } else {
       while (this.courant.getSuivant().getSuivant() != null) {
         this.courant = this.courant.getSuivant();
       }
