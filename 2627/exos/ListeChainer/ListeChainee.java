@@ -49,12 +49,17 @@ public class ListeChainee {
     }
   }
 
-
   public Object enTete() {
-    return tete.getContenu();
+    if (this.tete == null) {
+      return null;
+    }
+    return this.tete.getContenu();
   }
 
   public Object enCourant() {
+    if (this.courant == null) {
+      return null;
+    }
     return this.courant.getContenu();
   }
 
@@ -107,16 +112,24 @@ public class ListeChainee {
 
   public void retireQueue() {
     this.razCourant();
-    if (this.courant.getSuivant() == null) {
+
+    if (this.courant == null) {
       return;
-    } else if (this.courant.getSuivant().getSuivant() == null) {
+    }
+    if (this.courant.getSuivant() == null) {
+      this.tete = null;
       this.queue = null;
     } else {
       while (this.courant.getSuivant().getSuivant() != null) {
         this.courant = this.courant.getSuivant();
       }
+      this.courant.setSuivant(null);
       this.queue = this.courant;
     }
+  }
+
+  public void insereCourant(Object o) {
+
   }
 
 }
